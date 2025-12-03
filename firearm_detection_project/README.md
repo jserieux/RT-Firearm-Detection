@@ -62,7 +62,7 @@ dataset/
 ## Training
 Train a YOLOv8 model:
 ```
-python scripts/train_yolov8.py --epochs 100 --batch 32 --imgsz 640 --device 0 #if cuda is available
+python scripts/train_yolov8.py --epochs 100 --batch 64 --imgsz 640 --device 0 #if cuda is available
 ```
 All runs are stored under `runs_firearm/detect/yolov8s_mgd_usrt/`. Adjust hyperparameters through CLI flags.
 

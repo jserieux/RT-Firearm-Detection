@@ -72,7 +72,7 @@ def load_id_list(image_sets_dir: Path, filename: str) -> set[str]:
 def convert_dataset(src_root: Path, dst_root: Path) -> None:
     annotations_dir, images_dir = locate_dataset_dirs(src_root)
 
-    image_sets_dir = src_root / "ImageSets" / "Main"
+    image_sets_dir = annotations_dir.parent / "ImageSets" / "Main"
     test_ids = load_id_list(image_sets_dir, "test.txt")
     train_ids = load_id_list(image_sets_dir, "train.txt")
     if not train_ids:
