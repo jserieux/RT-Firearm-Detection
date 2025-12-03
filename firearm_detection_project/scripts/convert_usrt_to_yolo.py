@@ -147,8 +147,8 @@ def convert_coco(json_path: Path, images_dir: Path, dst_images: Path, dst_labels
 
 
 def convert_dataset(src_root: Path, dst_root: Path) -> None:
-    dst_images = dst_root / "dataset/images/train"
-    dst_labels = dst_root / "dataset/labels/train"
+    dst_images = dst_root / "dataset_usrt/images/train"
+    dst_labels = dst_root / "dataset_usrt/labels/train"
     dst_images.mkdir(parents=True, exist_ok=True)
     dst_labels.mkdir(parents=True, exist_ok=True)
 

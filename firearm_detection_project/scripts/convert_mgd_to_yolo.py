@@ -62,13 +62,29 @@ def locate_dataset_dirs(src_root: Path) -> tuple[Path, Path]:
     )
 
 
+def load_id_list(image_sets_dir: Path, filename: str) -> set[str]:
+    file_path = image_sets_dir / filename
+    if not file_path.exists():
+        return set()
+    return {line.strip() for line in file_path.read_text().splitlines() if line.strip()}
+
+
 def convert_dataset(src_root: Path, dst_root: Path) -> None:
     annotations_dir, images_dir = locate_dataset_dirs(src_root)
 
-    dst_images = dst_root / "dataset/images/train"
-    dst_labels = dst_root / "dataset/labels/train"
-    dst_images.mkdir(parents=True, exist_ok=True)
-    dst_labels.mkdir(parents=True, exist_ok=True)
+    image_sets_dir = src_root / "ImageSets" / "Main"
+    test_ids = load_id_list(image_sets_dir, "test.txt")
+    train_ids = load_id_list(image_sets_dir, "train.txt")
+    if not train_ids:
+        # Some VOC releases only include trainval.txt; treat it as training.
+        train_ids = load_id_list(image_sets_dir, "trainval.txt")
+
+    dst_images_train = dst_root / "dataset_mgd/images/train"
+    dst_labels_train = dst_root / "dataset_mgd/labels/train"
+    dst_images_val = dst_root / "dataset_mgd/images/val"
+    dst_labels_val = dst_root / "dataset_mgd/labels/val"
+    for path in (dst_images_train, dst_labels_train, dst_images_val, dst_labels_val):
+        path.mkdir(parents=True, exist_ok=True)
 
     xml_files = sorted(annotations_dir.glob("*.xml"))
     if not xml_files:
@@ -139,8 +155,16 @@ def convert_dataset(src_root: Path, dst_root: Path) -> None:
         if not label_lines:
             continue
 
-        dst_image_path = dst_images / image_path.name
-        dst_label_path = dst_labels / (image_path.stem + ".txt")
+        file_stem = Path(image_path.name).stem
+        if test_ids and file_stem in test_ids:
+            dst_img_dir, dst_lbl_dir = dst_images_val, dst_labels_val
+        else:
+            if train_ids and file_stem not in train_ids:
+                continue
+            dst_img_dir, dst_lbl_dir = dst_images_train, dst_labels_train
+
+        dst_image_path = dst_img_dir / image_path.name
+        dst_label_path = dst_lbl_dir / (file_stem + ".txt")
 
         shutil.copy2(image_path, dst_image_path)
         with dst_label_path.open("w", encoding="utf-8") as label_file:

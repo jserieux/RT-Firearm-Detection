@@ -19,7 +19,7 @@ COLORS = {
 
 THREAT_THRESHOLDS = {
     "low": 0.5,
-    "medium": 0.8,
+    "medium": 0.75,
 }
 
 

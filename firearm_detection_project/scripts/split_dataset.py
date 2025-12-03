@@ -1,4 +1,4 @@
-"""Split prepared dataset into train/val subsets."""
+"""Assemble final train/val splits by merging MGD and USRT samples."""
 from __future__ import annotations
 
 import argparse
@@ -12,40 +12,81 @@ from tqdm import tqdm
 LOGGER = logging.getLogger("split_dataset")
 
 
-def split_dataset(project_root: Path, val_ratio: float, seed: int) -> None:
-    rng = random.Random(seed)
-    images_train_dir = project_root / "dataset/images/train"
-    labels_train_dir = project_root / "dataset/labels/train"
-    images_val_dir = project_root / "dataset/images/val"
-    labels_val_dir = project_root / "dataset/labels/val"
-    for path in (images_val_dir, labels_val_dir):
-        path.mkdir(parents=True, exist_ok=True)
+def ensure_clean_dir(path: Path) -> None:
+    if path.exists():
+        shutil.rmtree(path)
+    path.mkdir(parents=True, exist_ok=True)
 
-    image_paths = sorted(images_train_dir.glob("*"))
-    paired = [p for p in image_paths if (labels_train_dir / (p.stem + ".txt")).exists()]
+
+def copy_split(src_images: Path, src_labels: Path, dst_images: Path, dst_labels: Path) -> int:
+    count = 0
+    for img_path in sorted(src_images.glob("*")):
+        if not img_path.is_file():
+            continue
+        label_path = src_labels / f"{img_path.stem}.txt"
+        if not label_path.exists():
+            continue
+        shutil.copy2(img_path, dst_images / img_path.name)
+        shutil.copy2(label_path, dst_labels / label_path.name)
+        count += 1
+    return count
+
+
+def split_usrt(usrt_root: Path, val_ratio: float, seed: int) -> None:
+    rng = random.Random(seed)
+    train_img = usrt_root / "images/train"
+    train_lbl = usrt_root / "labels/train"
+    val_img = usrt_root / "images/val"
+    val_lbl = usrt_root / "labels/val"
+    val_img.mkdir(parents=True, exist_ok=True)
+    val_lbl.mkdir(parents=True, exist_ok=True)
+
+    paired = [p for p in sorted(train_img.glob("*")) if (train_lbl / f"{p.stem}.txt").exists()]
     if not paired:
-        LOGGER.warning("No paired image/label files found; did you run conversion scripts?")
+        LOGGER.warning("No USRT samples found to split. Did you run convert_usrt_to_yolo.py?")
         return
 
     rng.shuffle(paired)
     val_count = max(1, int(len(paired) * val_ratio))
-    val_images = set(paired[:val_count])
+    val_set = set(paired[:val_count])
+    LOGGER.info("Splitting USRT (%s) into %s train / %s val", len(paired), len(paired) - val_count, val_count)
 
-    LOGGER.info("Splitting %s images into %s train / %s val", len(paired), len(paired) - val_count, val_count)
+    for img_path in tqdm(paired, desc="USRT split"):
+        label_path = train_lbl / f"{img_path.stem}.txt"
+        if img_path in val_set:
+            shutil.move(str(img_path), val_img / img_path.name)
+            shutil.move(str(label_path), val_lbl / label_path.name)
 
-    for img_path in tqdm(paired, desc="Moving files"):
-        label_path = labels_train_dir / (img_path.stem + ".txt")
-        if img_path in val_images:
-            dst_img = images_val_dir / img_path.name
-            dst_lbl = labels_val_dir / label_path.name
-        else:
-            dst_img = images_train_dir / img_path.name
-            dst_lbl = labels_train_dir / label_path.name
-        if img_path != dst_img:
-            shutil.move(str(img_path), dst_img)
-        if label_path != dst_lbl:
-            shutil.move(str(label_path), dst_lbl)
 
+def assemble_dataset(project_root: Path, val_ratio: float, seed: int) -> None:
+    final_img_train = project_root / "dataset/images/train"
+    final_lbl_train = project_root / "dataset/labels/train"
+    final_img_val = project_root / "dataset/images/val"
+    final_lbl_val = project_root / "dataset/labels/val"
+
+    for path in (final_img_train, final_lbl_train, final_img_val, final_lbl_val):
+        ensure_clean_dir(path)
+
+    mgd_root = project_root / "dataset_mgd"
+    usrt_root = project_root / "dataset_usrt"
+
+    if not mgd_root.exists():
+        LOGGER.warning("MGD dataset not found at %s", mgd_root)
+    else:
+        train_count = copy_split(mgd_root / "images/train", mgd_root / "labels/train", final_img_train, final_lbl_train)
+        val_count = copy_split(mgd_root / "images/val", mgd_root / "labels/val", final_img_val, final_lbl_val)
+        LOGGER.info("Copied %s MGD train and %s MGD val samples", train_count, val_count)
+
+    if not usrt_root.exists():
+        LOGGER.warning("USRT dataset not found at %s", usrt_root)
+        return
+
+    split_usrt(usrt_root, val_ratio, seed)
+
+    train_count = copy_split(usrt_root / "images/train", usrt_root / "labels/train", final_img_train, final_lbl_train)
+    val_count = copy_split(usrt_root / "images/val", usrt_root / "labels/val", final_img_val, final_lbl_val)
+    LOGGER.info("Merged %s USRT train and %s USRT val samples", train_count, val_count)
+    LOGGER.info("Final dataset ready at %s", project_root / "dataset")
 
 
 def parse_args() -> argparse.Namespace:
@@ -59,7 +100,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     args = parse_args()
-    split_dataset(args.root, args.val_ratio, args.seed)
+    assemble_dataset(args.root, args.val_ratio, args.seed)
 
 
 if __name__ == "__main__":

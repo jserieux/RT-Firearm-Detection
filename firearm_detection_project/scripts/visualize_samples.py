@@ -1,4 +1,3 @@
-"""Visualize random labeled samples to verify YOLO annotations."""
 from __future__ import annotations
 
 import argparse
