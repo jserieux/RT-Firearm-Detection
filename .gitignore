@@ -1,2 +1,5 @@
 data/
 firearm_detection_project/dataset
+firearm_detection_project/yolo11n.pt
+firearm_detection_project/yolov8s.pt
+firearm_detection_project/runs_firearm

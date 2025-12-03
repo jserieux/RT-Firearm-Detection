@@ -3,7 +3,5 @@ train: images/train
 val: images/val
 
 names:
-  0: pistol
-  1: handgun
-  2: short_rifle
-  3: knife
+  0: handgun_pistol
+  1: short_rifle
