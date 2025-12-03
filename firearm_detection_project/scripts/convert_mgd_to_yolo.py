@@ -15,13 +15,12 @@ LOGGER = logging.getLogger("convert_mgd")
 # Shared label space across datasets. Extend this dict if new labels appear.
 CLASS_NAME_TO_ID = {
     "pistol": 0,
-    "handgun": 1,
-    "gun": 1,
-    "weapon": 1,
-    "firearm": 1,
-    "rifle": 2,
-    "short_rifle": 2,
-    "knife": 3,
+    "handgun": 0,
+    "gun": 0,
+    "weapon": 0,
+    "firearm": 0,
+    "short_rifle": 1,
+    "rifle": 1,
 }
 
 
