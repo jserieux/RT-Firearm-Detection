@@ -29,6 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source", type=str, default="0", help="Video path or camera index (default webcam 0)")
     parser.add_argument("--imgsz", type=int, default=640)
     parser.add_argument("--conf", type=float, default=0.25)
+    parser.add_argument("--iou", type=float, default=0.5, help="IoU threshold for NMS")
+    parser.add_argument("--max-det", type=int, default=50, help="Maximum detections per image")
     parser.add_argument("--save", type=str, default="", help="Optional output video path")
     return parser.parse_args()
 
@@ -71,7 +73,14 @@ def main() -> None:
             if not grabbed:
                 break
             start = time.time()
-            results = model.predict(frame, imgsz=args.imgsz, conf=args.conf, verbose=False)
+            results = model.predict(
+                frame,
+                imgsz=args.imgsz,
+                conf=args.conf,
+                iou=args.iou,
+                max_det=args.max_det,
+                verbose=False,
+            )
             end = time.time()
             fps_queue.append(1.0 / max(end - start, 1e-6))
             avg_fps = sum(fps_queue) / len(fps_queue)
