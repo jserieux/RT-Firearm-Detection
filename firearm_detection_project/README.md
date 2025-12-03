@@ -23,7 +23,7 @@ firearm_detection_project/
 1. (Optional) create a virtual environment to use.
 
 2. Install dependencies:
-   ```bash
+   ```
    pip install -r requirements.txt
    ```
 3. Download and extract the datasets:
@@ -34,21 +34,21 @@ firearm_detection_project/
 Run the following scripts from the project root in order:
 
 1. **Convert MGD to Yolo Format**
-   ```bash
+   ```
    python scripts/convert_mgd_to_yolo.py
    ```
 2. **Convert USRT to Yolo Format**
-   ```bash
+   ```
    python scripts/convert_usrt_to_yolo.py
    ```
 3. **Merge splits**
-   ```bash
+   ```
    python scripts/split_dataset.py --val-ratio 0.2 --seed 42
    ```
    This command copies the MGD train/test subsets (stored under `dataset_mgd/`) into the final `dataset/` directory and splits/merges the USRT samples (`dataset_usrt/`) then copies into the final `dataset/` directory. Adjust `--val-ratio` if you want a different USRT split.
    
 4. (Optional) Visualize a random subset to check ground truth:
-   ```bash
+   ```
    python scripts/visualize_samples.py --subset train --count 8 --save-dir samples
    ```
 
@@ -61,21 +61,21 @@ dataset/
 
 ## Training
 Train a YOLOv8 model:
-```bash
+```
 python scripts/train_yolov8.py --epochs 100 --batch 32 --imgsz 640 --device 0 #if cuda is available
 ```
 All runs are stored under `runs_firearm/detect/yolov8s_mgd_usrt/`. Adjust hyperparameters through CLI flags.
 
 ## Evaluation
-Evaluate the latest checkpoint on the validation split:
-```bash
+Evaluate the latest checkpoint on the validation split (runs automatically after training):
+```
 python scripts/evaluate_results.py --weights runs_firearm/detect/yolov8s_mgd_usrt/weights/best.pt
 ```
 Printed metrics include `mAP@0.5`, `mAP@0.5:0.95`, precision, and recall in order to compare different training runs
 
 ## Real-time / video inference
 Use a webcam (`--source 0`) or any video file to test the trained detector with threat-level overlays:
-```bash
+```
 python scripts/infer_video.py \
   --weights runs_firearm/detect/yolov8s_mgd_usrt/weights/best.pt \
   --source 0 \
@@ -91,7 +91,7 @@ Add `--save out.mp4` to export annotated footage.
 ### Creating a test clip from the USRT frames
 USRT ships as individual frames that can be stitched together for live inference:
 
-```bash
+```
 # 1) Create the clip
 mkdir -p data
 ffmpeg -framerate 2 -pattern_type glob \
