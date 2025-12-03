@@ -17,6 +17,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--project", type=str, default="runs_firearm")
     parser.add_argument("--name", type=str, default="yolov8s_mgd_usrt")
     parser.add_argument("--weights", type=str, default="yolov8s.pt")
+    parser.add_argument("--optimizer", type=str, default="auto")
+    parser.add_argument("--hsv-h", type=float, default=0.015)
+    parser.add_argument("--hsv-s", type=float, default=0.7)
+    parser.add_argument("--hsv-v", type=float, default=0.4)
+    parser.add_argument("--scale", type=float, default=0.5)
+    parser.add_argument("--translate", type=float, default=0.1)
+    parser.add_argument("--mosaic", type=float, default=1.0)
+    parser.add_argument("--copy-paste", type=float, default=0.0)
+    parser.add_argument("--erasing", type=float, default=0.4)
     return parser.parse_args()
 
 
@@ -31,6 +40,15 @@ def main() -> None:
         device=args.device,
         project=args.project,
         name=args.name,
+        optimizer=args.optimizer,
+        hsv_h=args.hsv_h,
+        hsv_s=args.hsv_s,
+        hsv_v=args.hsv_v,
+        scale=args.scale,
+        translate=args.translate,
+        mosaic=args.mosaic,
+        copy_paste=args.copy_paste,
+        erasing=args.erasing,
     )
     best_path = Path(results.save_dir) / "weights" / "best.pt"
     print(f"Training complete. Best model saved to {best_path}")
