@@ -3,21 +3,23 @@
 End-to-end YOLOv8 workflow for training a firearm detector by combining the Monash Guns Dataset (MGD) and the US Real-time Gun Detection in CCTV (USRT) dataset. The focus is producing a CCTV-ready model with real-time inference overlays and evaluation utilities for a course project.
 
 ## Project layout
-firearm_detection_project/
-├── dataset/                    # Final merged YOLO dataset
-├── dataset_mgd/                # Intermediate MGD splits (train/test)
-├── dataset_usrt/               # Intermediate USRT samples prior to splitting
+```
+├── dataset/                     # Final merged YOLO dataset
+├── dataset_mgd/                 # Intermediate MGD splits (train/test)
+├── dataset_usrt/                # Intermediate USRT samples prior to splitting
+├── runs_firearm/                # Training runs and artifacts
 ├── scripts/
-│   ├── convert_mgd_to_yolo.py    # MGD VOC → YOLO conversion
-│   ├── convert_usrt_to_yolo.py   # USRT annotations → YOLO conversion
-│   ├── split_dataset.py        # Train/val split
-│   ├── train_yolov8.py         # Ultralytics training helper
-│   ├── evaluate_results.py     # Validation metrics
-│   ├── infer_video.py          # Real-time/video inference with threat levels
-│   └── visualize_samples.py    # Quick sanity check plots
-├── firearm.yaml                # YOLO dataset config (two classes: handgun and pistol are combined, short_rifle)
+│   ├── convert_mgd_to_yolo.py   # MGD VOC → YOLO conversion
+│   ├── convert_usrt_to_yolo.py  # USRT annotations → YOLO conversion
+│   ├── split_dataset.py         # Train/val split
+│   ├── train_yolov8.py          # Ultralytics training helper
+│   ├── evaluate_results.py      # Validation metrics
+│   ├── infer_video.py           # Real-time/video inference with threat levels
+│   └── visualize_samples.py     # Visualize plots
+├── firearm.yaml                 # YOLO dataset config (two classes: handgun and pistol are combined, short_rifle)
 ├── requirements.txt
 └── README.md
+```
 
 ## Setup
 1. (Optional) create a virtual environment to use.
@@ -27,17 +29,17 @@ firearm_detection_project/
    pip install -r requirements.txt
    ```
 3. Download and extract the datasets:
-   - **MGD (Monash Guns Dataset)** – https://github.com/MarcusLimJunYi/Monash-Guns-Dataset/,
+   - **MGD (Monash Guns Dataset)** – https://github.com/MarcusLimJunYi/Monash-Guns-Dataset/
    - **USRT (US Real-time Gun Detection in CCTV)** – https://github.com/Deepknowledge-US/US-Real-time-gun-detection-in-CCTV-An-open-problem-dataset
 
 ## Data preparation workflow
 Run the following scripts from the project root in order:
 
-1. **Convert MGD to Yolo Format**
+1. **Convert MGD to YOLO format**
    ```
    python scripts/convert_mgd_to_yolo.py
    ```
-2. **Convert USRT to Yolo Format**
+2. **Convert USRT to YOLO format**
    ```
    python scripts/convert_usrt_to_yolo.py
    ```
